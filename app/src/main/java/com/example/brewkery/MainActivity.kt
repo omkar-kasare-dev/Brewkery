@@ -26,13 +26,14 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    private val viewModel: MenuViewModel by viewModels()
+   // private val viewModel: MenuViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             MaterialTheme {
                 BrewkeryNavHost()
+                /*
                 val state by viewModel.uiState.collectAsState()
 
                 val summary = when (val s = state) {
@@ -56,7 +57,7 @@ class MainActivity : ComponentActivity() {
                         Button(onClick = { viewModel.selectCategory("cat_bakery") }) { Text("Bakery only") }
                         Button(onClick = { viewModel.selectCategory(null) }) { Text("All items") }
                     }
-                }
+                } */
             }
         }
     }

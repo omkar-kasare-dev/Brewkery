@@ -1,3 +1,61 @@
 <resources>
     <string name="app_name">Brewkery</string>
+
+    <!-- Menu header (these strings are in the prototype, not in the API) -->
+    <string name="menu_overline">Fresh Roast &amp; Bakes</string>
+    <string name="menu_title">Brewkery Artisans</string>
+    <string name="avatar_initials">BK</string>
+    <plurals name="cart_button_description">
+        <item quantity="one">Cart, %d item</item>
+        <item quantity="other">Cart, %d items</item>
+    </plurals>
+
+    <!-- Banners -->
+    <string name="store_info_label">STORE INFO</string>
+    <string name="delivery_in">Delivery in %1$s</string>
+    <string name="flat_fee">%1$s flat fee</string>
+    <string name="store_open">Open</string>
+    <string name="active_order_label">ACTIVE ORDER</string>
+    <string name="active_order_title">Order #%1$s</string>
+    <string name="active_order_subtitle">Preparing · wait %1$s</string>
+    <string name="active_order_track">Track</string>
+
+    <!-- Search, categories, cards -->
+    <string name="search_placeholder">Search roast, cold brew, pastry...</string>
+    <string name="search_description">Search the menu</string>
+    <string name="category_all">All Items</string>
+    <string name="customize_action">+ Customize</string>
+    <string name="customize_item">Customize %1$s</string>
+    <string name="rating_description">Rated %1$s out of 5 from %2$d reviews</string>
+
+    <!-- Cart bar -->
+    <string name="view_your_cart">View Your Cart</string>
+    <string name="proceed_to_checkout">Proceed to Checkout →</string>
+    <plurals name="cart_bar_description">
+        <item quantity="one">View your cart, %1$d item, subtotal %2$s</item>
+        <item quantity="other">View your cart, %1$d items, subtotal %2$s</item>
+    </plurals>
+
+    <!-- States -->
+    <string name="loading_menu">Loading menu</string>
+    <string name="retry">Retry</string>
+    <string name="error_network">No internet connection. Check your network and try again.</string>
+    <string name="error_server">The menu server returned an error. Please try again.</string>
+    <string name="error_unknown">Something went wrong while loading the menu.</string>
+    <string name="empty_title">No items found</string>
+    <string name="empty_subtitle">Try a different search or category.</string>
+
+    <!-- Detail -->
+    <string name="detail_title">ITEM CUSTOMIZER</string>
+    <string name="navigate_back">Back</string>
+    <string name="key_ingredients">KEY INGREDIENTS</string>
+    <string name="size_selection">Size Selection</string>
+    <string name="milk_options">Milk Options / Spreads</string>
+    <string name="sugar_levels">Sugar Levels / Serving</string>
+    <string name="add_to_cart_price">Add to Cart • %1$s</string>
+    <string name="decrease_quantity">Decrease quantity</string>
+    <string name="increase_quantity">Increase quantity</string>
+    <string name="quantity_value">Quantity %1$d</string>
+    <string name="item_not_found">This item is no longer available.</string>
+    <string name="item_not_found_hint">Go back and pick another item.</string>
 </resources>
