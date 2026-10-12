@@ -66,4 +66,16 @@ class CartRepositoryTest {
         assertNull(repo.placeOrder("20 - 30 mins"))
         assertNull(repo.activeOrder.value)
     }
+
+    @Test
+    fun clearEmptiesTheCartButKeepsThePlacedOrder() {
+        repo.add(testLine(qty = 2))
+        repo.placeOrder("20 - 30 mins")
+        repo.add(testLine(qty = 1))
+
+        repo.clear()
+
+        assertTrue(repo.lines.value.isEmpty())
+        assertTrue(repo.activeOrder.value != null)
+    }
 }

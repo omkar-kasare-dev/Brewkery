@@ -1,6 +1,5 @@
 package com.example.brewkery.cart
 
-
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -42,6 +41,11 @@ class CartRepository @Inject constructor() {
                 current.map { if (it.id == lineId) it.copy(quantity = quantity) else it }
             }
         }
+    }
+
+    /** "Clear Cart". Leaves any already-placed order untouched. */
+    fun clear() {
+        _lines.value = emptyList()
     }
 
     /** Clears the cart and creates the ticket. Returns null if the cart was empty. */

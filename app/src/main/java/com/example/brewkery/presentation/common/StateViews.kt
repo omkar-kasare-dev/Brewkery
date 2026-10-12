@@ -75,15 +75,22 @@ fun ErrorView(
     }
 }
 
+
+
 @Composable
-fun EmptyView(title: String, subtitle: String, modifier: Modifier = Modifier) {
+fun EmptyView(
+    title: String,
+    subtitle: String,
+    modifier: Modifier = Modifier,
+    emoji: String = "🔍"
+) {
     Column(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 40.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("🔍", fontSize = 28.sp)
+        Text(emoji, fontSize = 28.sp)
         Spacer(Modifier.height(8.dp))
         Text(title, style = BrewkeryText.BodyBold, color = BrewkeryColors.Ink)
         Text(
