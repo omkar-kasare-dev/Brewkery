@@ -18,8 +18,6 @@ import kotlinx.coroutines.flow.transformWhile
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-private const val MAX_QUANTITY = 99
-
 @HiltViewModel
 class CartViewModel @Inject constructor(
     private val menuRepository: MenuRepository,
@@ -63,8 +61,9 @@ class CartViewModel @Inject constructor(
         }
     }
 
+    /** The repository caps the quantity. */
     fun onIncrement(line: CartLine) {
-        cartRepository.setQuantity(line.id, (line.quantity + 1).coerceAtMost(MAX_QUANTITY))
+        cartRepository.setQuantity(line.id, line.quantity + 1)
     }
 
     /** Going below 1 removes the line (handled by the repository). */

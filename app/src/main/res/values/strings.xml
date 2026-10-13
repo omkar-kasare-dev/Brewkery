@@ -39,7 +39,7 @@
     <!-- States -->
     <string name="loading_menu">Loading menu</string>
     <string name="retry">Retry</string>
-    <string name="error_network">No internet connection. Check your network and try again.</string>
+    <string name="error_network">Couldn\'t reach the server. Check your connection and try again.</string>
     <string name="error_server">The menu server returned an error. Please try again.</string>
     <string name="error_unknown">Something went wrong while loading the menu.</string>
     <string name="empty_title">No items found</string>

@@ -1,5 +1,6 @@
 package com.example.brewkery.cart
 
+
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -8,6 +9,9 @@ import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.random.Random
+
+/** Upper bound for a single cart line, enforced here so every caller gets the same rule. */
+const val MAX_LINE_QUANTITY = 99
 
 /** In-memory cart + last placed order. The brief says it's fine for the cart to reset on app close. */
 @Singleton
@@ -19,15 +23,19 @@ class CartRepository @Inject constructor() {
     private val _activeOrder = MutableStateFlow<Order?>(null)
     val activeOrder: StateFlow<Order?> = _activeOrder.asStateFlow()
 
-    /** Same item + same choices as an existing line merges quantities. */
+    /** Same item + same choices as an existing line merges quantities (capped). */
     fun add(line: CartLine) {
         _lines.update { current ->
             if (current.any { it.id == line.id }) {
                 current.map {
-                    if (it.id == line.id) it.copy(quantity = it.quantity + line.quantity) else it
+                    if (it.id == line.id) {
+                        it.copy(quantity = (it.quantity + line.quantity).coerceAtMost(MAX_LINE_QUANTITY))
+                    } else {
+                        it
+                    }
                 }
             } else {
-                current + line
+                current + line.copy(quantity = line.quantity.coerceIn(1, MAX_LINE_QUANTITY))
             }
         }
     }
@@ -38,7 +46,9 @@ class CartRepository @Inject constructor() {
             if (quantity <= 0) {
                 current.filterNot { it.id == lineId }
             } else {
-                current.map { if (it.id == lineId) it.copy(quantity = quantity) else it }
+                current.map {
+                    if (it.id == lineId) it.copy(quantity = quantity.coerceAtMost(MAX_LINE_QUANTITY)) else it
+                }
             }
         }
     }

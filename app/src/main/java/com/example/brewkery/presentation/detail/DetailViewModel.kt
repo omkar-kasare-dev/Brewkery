@@ -8,6 +8,7 @@ import androidx.navigation.toRoute
 import com.example.brewkery.cart.CartLine
 import com.example.brewkery.cart.CartRepository
 import com.example.brewkery.cart.ItemSelection
+import com.example.brewkery.cart.MAX_LINE_QUANTITY
 import com.example.brewkery.cart.PriceCalculator
 import com.example.brewkery.data.MenuRepository
 import com.example.brewkery.data.MenuResult
@@ -25,8 +26,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-private const val MAX_QUANTITY = 99
-
 @HiltViewModel
 class DetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
@@ -43,9 +42,10 @@ class DetailViewModel @Inject constructor(
     private var loadJob: Job? = null
     private var added = false
 
+    // Eagerly: the menu is normally already cached, so content is ready on the first frame.
     val uiState: StateFlow<DetailUiState> = combine(menuResult, chosen, quantity) { result, selection, qty ->
         buildState(result, selection, qty)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DetailUiState.Loading)
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, DetailUiState.Loading)
 
     init {
         load()
@@ -66,7 +66,7 @@ class DetailViewModel @Inject constructor(
 
     fun onSugarSelected(level: String) = updateSelection { it.copy(sugarLevel = level) }
 
-    fun onIncrement() = quantity.update { (it + 1).coerceAtMost(MAX_QUANTITY) }
+    fun onIncrement() = quantity.update { (it + 1).coerceAtMost(MAX_LINE_QUANTITY) }
 
     fun onDecrement() = quantity.update { (it - 1).coerceAtLeast(1) }
 

@@ -4,17 +4,21 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,7 +43,6 @@ import com.example.brewkery.presentation.common.formatWait
 import com.example.brewkery.ui.theme.BrewkeryColors
 import com.example.brewkery.ui.theme.BrewkeryShapes
 import com.example.brewkery.ui.theme.BrewkeryText
-
 
 @Composable
 fun OrderScreen(
@@ -67,7 +70,12 @@ fun OrderContent(
     ) {
         if (order == null) {
             // Only reachable if the process was killed while on this screen.
-            Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
                 EmptyView(
                     title = stringResource(R.string.no_active_order),
                     subtitle = stringResource(R.string.no_active_order_hint),
@@ -75,11 +83,27 @@ fun OrderContent(
                 )
             }
         } else {
-            Spacer(Modifier.height(32.dp))
-            OrderHero(Modifier.align(Alignment.CenterHorizontally))
-            Spacer(Modifier.weight(1f))
-            TicketCard(order)
-            Spacer(Modifier.weight(1f))
+            // Content is spread over the available height; when it doesn't fit
+            // (landscape, small screens, large fonts) it scrolls instead of clipping.
+            BoxWithConstraints(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            ) {
+                val minHeight = maxHeight
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
+                        .heightIn(min = minHeight),
+                    verticalArrangement = Arrangement.SpaceEvenly,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    OrderHero()
+                    TicketCard(order)
+                }
+            }
+            Spacer(Modifier.height(12.dp))
         }
         EspressoButton(text = stringResource(R.string.back_to_menu), onClick = onBackToMenu)
     }
@@ -163,7 +187,7 @@ private fun TicketCard(order: Order, modifier: Modifier = Modifier) {
                     .padding(horizontal = 10.dp, vertical = 4.dp)
             )
         }
-        Divider()
+        TicketDivider()
         TicketRow(
             label = stringResource(R.string.estimated_wait),
             value = formatWait(order.estimatedWait),
@@ -175,7 +199,7 @@ private fun TicketCard(order: Order, modifier: Modifier = Modifier) {
             value = stringResource(R.string.items_count, order.itemCount),
             valueColor = BrewkeryColors.Ink
         )
-        Divider()
+        TicketDivider()
         Text(
             text = stringResource(R.string.status_label),
             style = BrewkeryText.StatusLabel,
@@ -202,7 +226,7 @@ private fun TicketRow(label: String, value: String, valueColor: Color) {
 }
 
 @Composable
-private fun Divider() {
+private fun TicketDivider() {
     HorizontalDivider(
         modifier = Modifier.padding(vertical = 10.dp),
         thickness = 1.dp,

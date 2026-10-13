@@ -78,4 +78,12 @@ class CartRepositoryTest {
         assertTrue(repo.lines.value.isEmpty())
         assertTrue(repo.activeOrder.value != null)
     }
+
+    @Test
+    fun mergedQuantityIsCapped() {
+        repo.add(testLine(qty = 60))
+        repo.add(testLine(qty = 60))
+
+        assertEquals(MAX_LINE_QUANTITY, repo.lines.value.first().quantity)
+    }
 }

@@ -22,42 +22,14 @@ import com.example.brewkery.presentation.menu.MenuUiState
 import com.example.brewkery.presentation.menu.MenuViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
-/** TEMPORARY: data-layer smoke test. Replaced when the real UI is built. */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
-   // private val viewModel: MenuViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             MaterialTheme {
                 BrewkeryNavHost()
-                /*
-                val state by viewModel.uiState.collectAsState()
-
-                val summary = when (val s = state) {
-                    MenuUiState.Loading -> "Loading..."
-                    is MenuUiState.Success ->
-                        "Success: ${s.menu.items.size} items, ${s.menu.categories.size} categories, " +
-                                "visible=${s.visibleItems.size}, first=${s.menu.items.firstOrNull()?.name}"
-                    is MenuUiState.Error -> "Error: ${s.error}"
-                }
-                LaunchedEffect(summary) { Log.d("BrewkeryCheck", summary) }
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .safeDrawingPadding()
-                        .padding(16.dp)
-                ) {
-                    Text(summary)
-                    Button(onClick = { viewModel.loadMenu() }) { Text("Retry") }
-                    if (state is MenuUiState.Success) {
-                        Button(onClick = { viewModel.selectCategory("cat_bakery") }) { Text("Bakery only") }
-                        Button(onClick = { viewModel.selectCategory(null) }) { Text("All items") }
-                    }
-                } */
             }
         }
     }

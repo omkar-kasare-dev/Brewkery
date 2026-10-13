@@ -33,10 +33,10 @@ import com.example.brewkery.presentation.common.BackButton
 import com.example.brewkery.presentation.common.QuantityStepper
 import com.example.brewkery.presentation.common.StepperSize
 import com.example.brewkery.presentation.common.formatPrice
+
 import com.example.brewkery.ui.theme.BrewkeryColors
 import com.example.brewkery.ui.theme.BrewkeryShapes
 import com.example.brewkery.ui.theme.BrewkeryText
-
 
 @Composable
 fun CartTopBar(
@@ -80,8 +80,8 @@ fun CartLineRow(
     onDecrement: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // The prototype shows "size • milk/spread" (not the sugar level).
-    val options = listOfNotNull(line.size?.label, line.milk?.name).joinToString(" • ")
+    // Includes the sugar/serving level so two lines of the same item never look identical.
+    val options = listOfNotNull(line.size?.label, line.milk?.name, line.sugarLevel).joinToString(" • ")
 
     Row(
         modifier = modifier
