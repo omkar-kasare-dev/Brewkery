@@ -1,9 +1,10 @@
 # Brewkery
 
-A native Android coffee & bakery ordering app built with Kotlin and Jetpack Compose, powered by a single static REST API.
-Flow: **Menu → Item customizer → Cart → Order ticket.**
+Brewkery is a native Android app for ordering coffee and bakery items. It is built with Kotlin and Jetpack Compose and gets its menu from a static REST API.
 
-> Take-home assignment. The provided HTML prototype is the source of truth for the UI.
+The main flow is **Menu → Item customizer → Cart → Order ticket**.
+
+> This was a take-home assignment. I used the provided HTML prototype as the reference for the UI.
 
 ## Screens
 
@@ -13,27 +14,29 @@ Flow: **Menu → Item customizer → Cart → Order ticket.**
 
 ## Features
 
-- **Menu** loaded from `data.json`: store info (delivery time and fee come from the API), category chips, search (name, tagline, ingredients) and item cards with badge, rating and price.
-- **Item customizer**: size, milk/spread and sugar/serving selection with a live price, quantity stepper, and "Add to Cart • $X".
-- **Cart**: quantity steppers (decrementing from 1 removes the line), "Clear Cart", and a bill with subtotal, flat delivery fee, tax and total.
-- **Order**: generated ticket `BK-#####`, PREPARING status, estimated wait and item count. The Menu shows an active-order banner afterwards.
-- **States**: loading, error with retry (offline / server / unexpected), empty (no search results, empty cart).
-- Selections, quantities, search text and the cart survive rotation. The cart is in-memory (the brief allows resetting on app close).
+- **Menu:** Loads store details, categories and items from `data.json`. Delivery time and fee also come from the API. You can browse category chips, search by item name, tagline or ingredients, and see each item's badge, rating and price.
+- **Item customizer:** Choose a size, milk or spread, and sugar or serving option. The price updates as you make selections. You can also change the quantity and add the item to your cart.
+- **Cart:** Change item quantities, remove a line by reducing its quantity from 1, or clear the cart. The bill shows the subtotal, flat delivery fee, tax and total.
+- **Order:** Placing an order creates a ticket such as `BK-#####`, with PREPARING status, an estimated wait and the item count. After that, the Menu shows an active-order banner.
+- **Loading and empty states:** Includes loading, error states with retry for offline, server and unexpected errors, plus empty states for no search results and an empty cart.
+- Selections, quantities, search text and cart contents survive screen rotation. The cart is kept in memory, so it can reset when the app is closed, as allowed by the brief.
 
 ## Architecture
+
+The app follows this flow:
 
 ```
 Compose screen  →  ViewModel (StateFlow<UiState>)  →  Repository  →  Retrofit
 ```
 
-- **`MenuRepository`** (singleton) fetches `data.json` once and caches it. Failures become a small `MenuError` (`NETWORK`, `SERVER`, `UNKNOWN`), so no Retrofit/IO types reach the UI.
-- **`CartRepository`** (singleton, in-memory `StateFlow`) is the single source of truth for the cart and the placed order, shared by Menu, Detail, Cart and Order. ViewModels derive what they show from it, so nothing is duplicated.
-- **`PriceCalculator`** holds pure pricing functions. Money is stored as integer cents to avoid floating-point drift.
-- **State**: each screen has one immutable sealed `UiState`. Composables are split into a stateful screen and a stateless `...Content`, with state hoisted to the ViewModel.
-- **Navigation Compose** with type-safe routes. Only ids travel in arguments, and the back stack is shaped deliberately (see Decisions).
-- **Hilt** wires the singletons and ViewModels.
+- **`MenuRepository`:** A singleton that fetches `data.json` once and caches the result. It converts failures into a small `MenuError` (`NETWORK`, `SERVER`, `UNKNOWN`), so Retrofit and IO details do not reach the UI.
+- **`CartRepository`:** A singleton with an in-memory `StateFlow`. It owns the cart and placed order and is shared by Menu, Detail, Cart and Order. The ViewModels read from it, rather than keeping duplicate copies of the same data.
+- **`PriceCalculator`:** Keeps the pricing functions in one place. Prices are stored as integer cents to avoid floating-point rounding issues.
+- **UI state:** Each screen has one immutable sealed `UiState`. Each screen's Composables are split between a stateful screen and a stateless `...Content`, with state handled by the ViewModel.
+- **Navigation:** Navigation Compose uses type-safe routes. Only ids are passed as arguments, and the back stack is set up intentionally (see Decisions & trade-offs).
+- **Dependency injection:** Hilt provides the singletons and ViewModels.
 
-There are intentionally no use cases or DTO→domain mappers. At this size they would be pass-through layers with no behavior.
+I have not added use cases or DTO-to-domain mappers. For an app of this size, they would only pass data through without adding any behavior.
 
 ## Tech stack
 
@@ -47,7 +50,7 @@ There are intentionally no use cases or DTO→domain mappers. At this size they 
 | Build | AGP 9.2.1, Gradle Kotlin DSL, version catalog |
 | Tests | JUnit 4 |
 
-Not used on purpose: Room, Firebase, WorkManager, paging, and `material-icons-extended`.
+I intentionally left out Room, Firebase, WorkManager, paging and `material-icons-extended` because this app does not need them.
 
 ## API
 
@@ -55,28 +58,28 @@ Base URL: `https://raw.githubusercontent.com/VivekShah138/Brewkery/main/`
 
 | Endpoint | Used |
 |---|---|
-| `GET data.json` | Yes. Store meta, categories and all items. |
-| `GET api/items/{id}.json` | No. It returns the same object as an `items[]` entry, so Detail reads from the cached menu instead of making another request. |
+| `GET data.json` | Yes. Provides store details, categories and all items. |
+| `GET api/items/{id}.json` | No. It returns the same item object already included in `items[]`, so the Detail screen uses the cached menu instead of making another request. |
 
-No authentication and no pagination. Things worth knowing about the data:
+The API does not require authentication and does not use pagination. A few details affected how I built the app:
 
-- **Option ids repeat across items** (`sz_medium`, `m_oat`). A cart line is therefore keyed by item id plus the chosen options.
-- **`milk_options` holds spreads for bakery items**, and the UI label is the prototype's static "Milk Options / Spreads".
-- **One `sugar_levels` string embeds a surcharge** (`"Light Wildflower Honey (+0.40)"`). It is parsed and charged, so the label never disagrees with the total.
-- Some option groups have a single option. They render as selected and never break the layout.
-- Tax is applied to the **subtotal only** (the prototype's numbers confirm this: $14.25 → $1.14 tax → $17.89).
+- **Some option ids are reused across items**, such as `sz_medium` and `m_oat`. Because of that, a cart line is identified by the item id and its selected options together.
+- **`milk_options` is also used for bakery spreads.** The UI keeps the prototype's label, "Milk Options / Spreads".
+- **One `sugar_levels` value includes an extra charge:** `"Light Wildflower Honey (+0.40)"`. The app parses and adds that charge so the displayed option and final total agree.
+- Some option groups contain only one option. The app selects it automatically and still lays out the screen correctly.
+- Tax applies to the **subtotal only**. The prototype's numbers confirm this: $14.25 subtotal → $1.14 tax → $17.89 total.
 
-## Prototype fidelity
+## Matching the prototype
 
-Colors, type scale, radii and sizes were **measured from the prototype's CSS and screenshots** and turned into theme tokens (`presentation/theme`), not eyeballed.
+I measured the colors, type sizes, corner radii and dimensions from the prototype's CSS and screenshots, then added them as theme tokens under `presentation/theme` instead of estimating them by eye.
 
-Deliberate differences, each easy to revert:
+There are a few intentional differences:
 
-- The cart bar and the Add-to-Cart row are **pinned** to the bottom. In the prototype they scroll with the content (an artifact of its fixed-height phone frame).
-- **Search** is functional, which the prototype does not require.
-- The **heart** on the detail screen is decorative. The brief has no favorites feature.
-- The **active-order banner** reuses the store-info card style, because the prototype's screenshots don't show it.
-- The prototype's menu shows 4 items while the API returns 6. The app shows everything the API returns.
+- The cart bar and Add-to-Cart row stay pinned to the bottom. In the prototype they scroll with the content, which appears to be an effect of its fixed-height phone frame.
+- Search works in the app, even though it was not required by the prototype.
+- The heart on the detail screen is decorative; the brief does not include a favorites feature.
+- The active-order banner uses the same card style as the store information. The prototype screenshots do not show this banner.
+- The prototype displays four menu items, but the API returns six. The app displays all six items returned by the API.
 
 ## Project structure
 
@@ -95,63 +98,65 @@ app/src/main/java/com/example/brewkery/
 
 ## Build & run
 
-Requirements: an Android Studio version that supports AGP 9.2, JDK 17+, internet access (the menu and images are loaded over HTTPS). `minSdk` is 26.
+You will need an Android Studio version that supports AGP 9.2, JDK 17 or newer, and an internet connection because the menu and images load over HTTPS. The app's `minSdk` is 26.
 
 ```bash
-./gradlew :app:testDebugUnitTest      # unit tests
-./gradlew :app:assembleDebug          # app/build/outputs/apk/debug/app-debug.apk
+./gradlew :app:testDebugUnitTest      # run unit tests
+./gradlew :app:assembleDebug          # build the debug APK at app/build/outputs/apk/debug/app-debug.apk
 ```
 
-On Windows use `gradlew.bat`. A prebuilt debug APK is attached to the repository's Releases page.
+On Windows, use `gradlew.bat`. A prebuilt debug APK is available on the repository's Releases page.
 
 ## Tests
 
-Unit tests cover the logic that is easy to get subtly wrong:
+I added unit tests for the parts where small mistakes can affect the result:
 
-- `MenuModelsParsingTest`: the `data.json` shape, unknown keys, and defaults for optional fields.
-- `PriceCalculatorTest`: cents rounding, option extras, the `(+0.40)` surcharge, and the prototype's bill (subtotal 9.40 → tax 0.75 → total 12.65).
-- `CartRepositoryTest`: merging, same option ids on different items, quantity changes, clear, and placing an order.
-- `ItemSelectionTest`: the default-selection rule.
-- `MenuFilterTest`: category and search filtering.
+- `MenuModelsParsingTest`: checks the `data.json` structure, unknown keys and defaults for optional fields.
+- `PriceCalculatorTest`: checks cents rounding, option extras, the `(+0.40)` surcharge and the bill from the prototype (subtotal 9.40 → tax 0.75 → total 12.65).
+- `CartRepositoryTest`: checks merging cart lines, reused option ids on different items, quantity changes, clearing the cart and placing an order.
+- `ItemSelectionTest`: checks the default-selection rule.
+- `MenuFilterTest`: checks category and search filtering.
 
 ## Decisions & trade-offs
 
-- **Cart flow**: Add to Cart goes to the Cart and pops Detail, so Back returns to the Menu. Place Order replaces the Cart with the Order screen, so Back from the ticket also returns to the Menu.
-- **Default selection**: the first option with no surcharge, falling back to the first option. This reproduces the prototype's defaults (e.g. the macchiato at $4.85, the croissant at $3.90).
-- **Cart state during ordering**: the Cart screen stops updating once the order is placed. Without this it flashed its empty state while navigating away.
-- **Accessibility**: merged semantics on cards and rows, content descriptions on icon buttons, 48dp touch targets, and decorative images are not announced.
+- **Cart flow:** Tapping Add to Cart opens the Cart and removes Detail from the back stack, so Back takes you to the Menu. Place Order replaces the Cart screen with the Order screen, so Back from the ticket also takes you to the Menu.
+- **Default selection:** The app picks the first option without an extra charge, or the first option if every option has a surcharge. This matches the prototype's defaults, including the macchiato at $4.85 and the croissant at $3.90.
+- **Cart state while ordering:** The Cart screen stops observing updates once an order is placed. Otherwise, it briefly showed its empty state while the app navigated to the ticket.
+- **Accessibility:** Cards and rows use merged semantics, icon buttons have content descriptions, touch targets are 48dp, and decorative images are not announced by screen readers.
 
 ## Known limitations
 
-- The cart is not persisted across process death.
-- Portrait phone layout only.
-- The API is read-only, so "placing" an order is local. The ticket id is random.
+- The cart is not saved across process death.
+- The layout is designed for portrait phones only.
+- The API is read-only, so placing an order happens locally. The ticket id is random.
 
 ## AI usage
 
-I used **Claude** (Anthropic) throughout this assignment, as encouraged.
+I used **Claude** (Anthropic) during the assignment, as permitted in the brief. I worked through the app in stages and reviewed each stage before moving on.
 
-**How I worked.** In stages, with a review at the end of each one:
-1. Analysis first, with no code: requirements, API contract, architecture and risks.
-2. The data layer (models, Retrofit, repository, ViewModel), verified before continuing.
-3. Design tokens, then the screens one by one, then the cart and ordering behavior.
-4. I pasted real build logs back in for debugging.
+1. Started with the requirements, API contract, architecture and risks, without writing code.
+2. Built the data layer (models, Retrofit, repository and ViewModel) and checked it before moving on.
+3. Added the design tokens, built the screens one by one, then worked on the cart and ordering flow.
+4. Shared actual build logs with Claude when I needed help debugging.
 
 **Example prompts**
+
 - *"Analyze the assignment and prototype. Do NOT write code yet. Separate required, nice-to-have and unnecessary. If you can't inspect the API, tell me what you need instead of inventing a contract."*
 - *"Don't create unnecessary interfaces, mappers, managers or wrapper classes. Don't invent API fields. Every file must be complete and compilable."*
 - *"Deeply analyze the style block and the screenshots. Don't get confused."*
 
-**What worked well**
-- Measuring the prototype screenshots programmatically (colors, sizes, radii, font sizes calibrated against the real fonts) instead of guessing at the visual design.
-- Checking the real API and finding data quirks early (repeated option ids, the surcharge hidden in a sugar-level string), which shaped the cart's design.
-- Pinning the pricing rules in unit tests against the prototype's own numbers.
+**What helped**
 
-**Where the AI was wrong, and how I fixed it**
-- It used an outdated `hiltViewModel` import. The function moved to a new artifact in `androidx.hilt` 1.3, which gave "Unresolved reference". I switched to `hilt-lifecycle-viewmodel-compose`.
-- It suggested `minSdk = 24`. That conflicted with the template's adaptive launcher icons and failed resource linking. I set `minSdk = 26`.
-- It pinned Kotlin 2.2.10 from memory. A dependency pulled in stdlib 2.4.10, so the compiler couldn't read it (hundreds of "unresolved reference" errors from one cause). I aligned Kotlin, KSP and Hilt (2.4.10 / 2.3.11 / 2.60).
-- It guessed the default size was Grande and that option labels change per category. The screenshots disproved both, so the code follows them.
-- Its first font instructions produced resource errors (wrong file names), so I added correctly named static font files.
+- Measuring the prototype screenshots programmatically—including colors, sizes, corner radii and font sizes calibrated against the actual fonts—rather than guessing the design.
+- Checking the real API early and finding details such as repeated option ids and the surcharge hidden in a sugar-level string. These findings affected how the cart works.
+- Adding unit tests for the pricing rules and checking them against the amounts shown in the prototype.
 
-**What I verified myself**: I ran the app against the live API, tested offline and retry, rotation, and Back behavior at every step of the flow, and compared the totals with the prototype's numbers.
+**Where Claude got things wrong, and what I changed**
+
+- It suggested an outdated `hiltViewModel` import. The function had moved to an artifact in `androidx.hilt` 1.3, which caused an "Unresolved reference" error. I switched to `hilt-lifecycle-viewmodel-compose`.
+- It suggested `minSdk = 24`, but the template's adaptive launcher icons required a higher minimum and resource linking failed. I changed `minSdk` to 26.
+- It initially suggested Kotlin 2.2.10 from memory. A dependency brought in stdlib 2.4.10, which the compiler could not read and led to hundreds of "unresolved reference" errors. I aligned Kotlin, KSP and Hilt to 2.4.10 / 2.3.11 / 2.60.
+- It guessed that Grande was the default size and that option labels changed by category. The screenshots showed otherwise, so I followed the prototype.
+- Its first font instructions caused resource errors because the file names were wrong. I added the static font files with the correct names.
+
+**What I tested myself:** I ran the app against the live API, checked offline behavior and retry, rotated the device, tested Back navigation throughout the flow, and compared the totals with the prototype.
