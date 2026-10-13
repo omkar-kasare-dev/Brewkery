@@ -8,12 +8,8 @@ Flow: **Menu → Item customizer → Cart → Order ticket.**
 ## Screens
 
 | Menu | Item customizer | Cart | Order placed |
-|---|---|---|---|
-|[Menu](<img width="575" height="1280" alt="Menu" src="https://github.com/user-attachments/assets/1f1aaf7a-9a36-4253-97c3-48e3f2e80535" />
- | [Detail](<img width="575" height="1280" alt="ProductDetail" src="https://github.com/user-attachments/assets/6398fcf5-610a-4c18-8e8d-f07424263636" />
-) | [Cart](<img width="575" height="1280" alt="Cart" src="https://github.com/user-attachments/assets/a6482afc-f2de-47f8-8c69-ce21e7c2145d" />
-) | [Order](<img width="575" height="1280" alt="Order" src="https://github.com/user-attachments/assets/bee634fb-5e75-426a-a56b-6bfa854c4cd7" />
-) |
+|:---:|:---:|:---:|:---:|
+| <img src="https://github.com/user-attachments/assets/1f1aaf7a-9a36-4253-97c3-48e3f2e80535" alt="Menu screen" width="180" /> | <img src="https://github.com/user-attachments/assets/6398fcf5-610a-4c18-8e8d-f07424263636" alt="Item customizer screen" width="180" /> | <img src="https://github.com/user-attachments/assets/a6482afc-f2de-47f8-8c69-ce21e7c2145d" alt="Cart screen" width="180" /> | <img src="https://github.com/user-attachments/assets/bee634fb-5e75-426a-a56b-6bfa854c4cd7" alt="Order placed screen" width="180" /> |
 
 ## Features
 
